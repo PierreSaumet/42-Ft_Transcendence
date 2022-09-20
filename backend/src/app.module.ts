@@ -9,7 +9,6 @@ import { AuthentificationModule } from './authentification/authentification.modu
 import * as Joi from 'joi';
 import { ChatModule } from './chat/chat.module';
 import { JwtRefreshTokenStrategy, JwtTwoFactorStrategy } from './authentification/jwt.strategy'
-
 import { ScheduleModule } from '@nestjs/schedule';
 import { GameGateway} from './game/game.gateway';
 import { GameModule } from './game/game.module';
@@ -40,7 +39,6 @@ import { GameModule } from './game/game.module';
         entities: [User],
         synchronize: true, // For production should be false
         autoLoadEntities: true,
-        // dropSchema: true, //  don't use in production
       }),
       inject: [ConfigService],
     }), 
