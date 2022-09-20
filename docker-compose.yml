@@ -1,0 +1,99 @@
+version: "3"
+services:
+  db:
+    container_name: postgres_container
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - SECRET
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+    networks:
+      - db_net
+
+  nestjs:
+    container_name: nestjs_container
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_PORT
+      - POSTGRES_HOST
+      - FILES_DEST
+      - JWT_SECRET
+      - JWT_EXPIRATION_TIME
+      - TWO_FACTOR_AUTHENTICATION_APP_NAME
+      - JWT_REFRESH_TOKEN_SECRET
+      - JWT_REFRESH_TOKEN_EXPIRATION_TIME
+      - CLIEND_ID_42
+      - CLIENT_SECRET_42
+      - CLIENT_REDIRECT_42
+      - CLIENT_STATE
+    ports:
+      - '3000:3000'
+      - '8081:8081'
+      - '8082:8082'
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules/
+    networks:
+      - front_net
+      - back_net
+      - db_net
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_db:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL
+      - PGADMIN_DEFAULT_PASSWORD
+    depends_on:
+      - db
+    networks:
+      - db_net
+
+  frontend:
+    container_name: vuejs_container
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    environment:
+      - VUE_APP_AUTH42
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules/
+    depends_on:
+      - nestjs
+    networks:
+      - front_net
+      - back_net
+
+
+volumes:
+  postgres_db:
+  pgadmin_db:
+
+networks:
+  front_net:
+    driver: bridge
+  back_net:
+    driver: bridge
+  db_net:
+    driver: bridge
